@@ -17,5 +17,12 @@
     "savesystem"
   ],
   "displayName": "Save System",
-  "unity": "2021.1"
+  "unity": "2021.1",
+  "samples": [
+    {
+      "displayName": "Demo",
+      "description": "Save System Demo",
+      "path": "Samples~/Demo"
+    }
+  ]
 }
