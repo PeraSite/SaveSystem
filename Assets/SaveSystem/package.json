@@ -1,0 +1,21 @@
+{
+  "name": "com.perasite.savesystem",
+  "version": "1.0.0",
+  "description": "The Save System for Unity",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PeraSite/SaveSystem.git"
+  },
+  "author": {
+    "name": "PeraSite",
+    "email": "pretocki3@gmail.com",
+    "url": "https://github.com/PeraSite"
+  },
+  "keywords": [
+    "save",
+    "savesystem"
+  ],
+  "displayName": "Save System",
+  "unity": "2021.1"
+}
