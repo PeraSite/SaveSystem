@@ -1,42 +1,30 @@
 ﻿using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Zenject;
 
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
+
 namespace SaveSystem.Runtime {
-	public interface ISaver {
-		public string Key { get; }
-
-		public void ApplyDataWeak(object data);
-
-		public object SaveDataWeak();
-
-		public void ResetData();
-	}
-
-	public interface ISaver<T> : ISaver {
-		public void ApplyData(T data);
-
-		public T SaveData();
-
-		void ISaver.ApplyDataWeak(object data) {
-			ApplyData((T) data);
-		}
-
-		object ISaver.SaveDataWeak() {
-			return SaveData();
-		}
-	}
-
 	public abstract class Saver<T> : MonoBehaviour, ISaver<T> {
-		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
+		[SerializeField]
+#if ODIN_INSPECTOR
+		[FoldoutGroup("Saver"), ReadOnly]
+#endif
+
 		private string _key;
 		public string Key => _key;
 
-		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
+		[SerializeField]
+#if ODIN_INSPECTOR
+		[FoldoutGroup("Saver"), ReadOnly]
+#endif
 		private int _cachedInstanceId = -1;
 
+#if ODIN_INSPECTOR
 		[FoldoutGroup("Saver"), ShowInInspector, ReadOnly]
+#endif
 		private SaveManager _saveManager;
 
 #if UNITY_EDITOR
