@@ -2,12 +2,11 @@
 using System.Text;
 using Sirenix.Serialization;
 using Sirenix.Utilities;
-using UnityEngine;
 using Zenject;
 
 namespace SaveSystem.Runtime {
-	public class OdinDataSerializer : ScriptableObjectInstaller<OdinDataSerializer>, IDataSerializer {
-		[SerializeField] private DataFormat _dataFormat;
+	public class OdinDataSerializer : IDataSerializer {
+		private DataFormat _dataFormat;
 
 		public string Serialize<T>(T value) {
 			return Encoding.UTF8.GetString(SerializationUtility.SerializeValue(value, _dataFormat));
@@ -23,8 +22,9 @@ namespace SaveSystem.Runtime {
 			return SerializationUtility.DeserializeValueWeak(Encoding.UTF8.GetBytes(text), _dataFormat);
 		}
 
-		public override void InstallBindings() {
-			Container.BindInterfacesAndSelfTo<OdinDataSerializer>().FromInstance(this).AsSingle();
+		[Inject]
+		public void Construct(DataFormat dataFormat = DataFormat.JSON) {
+			_dataFormat = dataFormat;
 		}
 	}
 }

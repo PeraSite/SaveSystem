@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
-using Zenject;
 
 namespace SaveSystem.Runtime {
-	public class NewtonJsonDataSerializer : ScriptableObjectInstaller<NewtonJsonDataSerializer>, IDataSerializer {
+	public class NewtonJsonDataSerializer : IDataSerializer {
 		private struct Wrapper<T> {
 			public T Value;
 		}
@@ -18,10 +17,6 @@ namespace SaveSystem.Runtime {
 
 		public object Deserialize(string text) {
 			return JsonConvert.DeserializeObject<Wrapper<object>>(text).Value;
-		}
-
-		public override void InstallBindings() {
-			Container.BindInterfacesAndSelfTo<NewtonJsonDataSerializer>().FromInstance(this).AsSingle();
 		}
 	}
 }

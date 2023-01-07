@@ -1,16 +1,12 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 using Zenject;
 
 namespace SaveSystem.Runtime {
-	public class FadeSceneTransition : ScriptableObjectInstaller<FadeSceneTransition>, ISceneTransition,
-		IInitializable, IDisposable {
-		[SerializeField] private GameObject _prefab;
-		[SerializeField] private float _animationTime;
-
+	public class FadeSceneTransition : ISceneTransition {
 		private CanvasGroup _fade;
+		private float _animationTime;
 
 		public async UniTask StartTransition() {
 			_fade.DOKill();
@@ -26,18 +22,10 @@ namespace SaveSystem.Runtime {
 			_fade.gameObject.SetActive(false);
 		}
 
-		public void Initialize() {
-			var canvas = Instantiate(_prefab, ProjectContext.Instance.transform);
-			_fade = canvas.GetComponentInChildren<CanvasGroup>(true);
-		}
-
-		public void Dispose() {
-			_fade.DOKill();
-			_fade = null;
-		}
-
-		public override void InstallBindings() {
-			Container.BindInterfacesAndSelfTo<FadeSceneTransition>().FromInstance(this).AsSingle();
+		[Inject]
+		public void Construct(CanvasGroup fade, float animationTime) {
+			_fade = fade;
+			_animationTime = animationTime;
 		}
 	}
 }

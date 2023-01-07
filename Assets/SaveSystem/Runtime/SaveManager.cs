@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace SaveSystem.Runtime {
-	public class SaveManager : ScriptableObjectInstaller<SaveManager>, IInitializable, IDisposable {
+	public class SaveManager : IInitializable, IDisposable {
 		// Dependencies
 		private ISaveLoader _saveLoader;
 		private IDataSerializer _dataSerializer;
@@ -96,25 +96,11 @@ namespace SaveSystem.Runtime {
 		}
 
 		private async UniTask ChangeSceneAsync(string sceneName) {
-			//화면 가리기
 			await _sceneTransition.StartTransition();
-
-			// 현재 씬 데이터 저장
 			Save();
-
-			// 새 씬 로드
 			await _sceneLoader.LoadSceneAsync(sceneName);
-
-			// 새 씬에 데이터 로드
 			Load();
-
-			// 화면 보이기
 			await _sceneTransition.EndTransition();
-		}
-
-#region DI
-		public override void InstallBindings() {
-			Container.BindInterfacesAndSelfTo<SaveManager>().FromInstance(this).AsSingle();
 		}
 
 		[Inject]
@@ -128,6 +114,5 @@ namespace SaveSystem.Runtime {
 			_currentSaveSlot = saveSlot;
 			_currentSaveData = new SaveData();
 		}
-#endregion
 	}
 }
