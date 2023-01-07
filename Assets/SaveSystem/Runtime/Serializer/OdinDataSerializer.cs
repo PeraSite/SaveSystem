@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿#if ODIN_INSPECTOR
+using System.Text;
 using Sirenix.Serialization;
 using Zenject;
 
@@ -21,3 +22,5 @@ namespace SaveSystem.Runtime {
 		}
 	}
 }
+
+#endif
