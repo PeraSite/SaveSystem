@@ -80,3 +80,8 @@ Assets/StreamingAssets/build_info
 # Odin Inspector
 Assets/Plugins/Sirenix
 Assets/Plugins/Sirenix.meta
+
+# Samples
+Assets/SaveSystem/Samples
+Assets/SaveSystem/Samples/
+Assets/SaveSystem/Samples.meta
