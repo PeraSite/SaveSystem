@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da87cb03b563460d8dc771fa519cfb17, type: 3}
+  m_Name: Fade Scene Transition
+  m_EditorClassIdentifier: 
+  _prefab: {fileID: 8640318043595375193, guid: 1ad445fd2f0a70b43ad6ffa140b49b61, type: 3}
+  _animationTime: 0.5

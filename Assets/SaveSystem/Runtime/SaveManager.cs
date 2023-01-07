@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace SaveSystem.Runtime {
 	public class SaveManager : ScriptableObjectInstaller<SaveManager>, IInitializable, IDisposable {
+		// Dependencies
 		private ISaveLoader _saveLoader;
 		private IDataSerializer _dataSerializer;
-		private List<ISaver> _savers = new();
+		private ISceneTransition _sceneTransition;
+		private ZenjectSceneLoader _sceneLoader;
 
+		// State
+		private List<ISaver> _savers = new();
 		private SaveData _currentSaveData;
 		private string _currentSaveSlot;
 
@@ -86,15 +91,40 @@ namespace SaveSystem.Runtime {
 			Save();
 		}
 
+		public void ChangeScene(string sceneName) {
+			ChangeSceneAsync(sceneName).Forget();
+		}
+
+		private async UniTask ChangeSceneAsync(string sceneName) {
+			//화면 가리기
+			await _sceneTransition.StartTransition();
+
+			// 현재 씬 데이터 저장
+			Save();
+
+			// 새 씬 로드
+			await _sceneLoader.LoadSceneAsync(sceneName);
+
+			// 새 씬에 데이터 로드
+			Load();
+
+			// 화면 보이기
+			await _sceneTransition.EndTransition();
+		}
+
 #region DI
 		public override void InstallBindings() {
 			Container.BindInterfacesAndSelfTo<SaveManager>().FromInstance(this).AsSingle();
 		}
 
 		[Inject]
-		public void Construct(ISaveLoader saveLoader, IDataSerializer dataSerializer, string saveSlot = "Slot") {
+		public void Construct(ISaveLoader saveLoader, IDataSerializer dataSerializer, ISceneTransition sceneTransition,
+			ZenjectSceneLoader sceneLoader, string saveSlot = "Slot") {
 			_saveLoader = saveLoader;
 			_dataSerializer = dataSerializer;
+			_sceneTransition = sceneTransition;
+			_sceneLoader = sceneLoader;
+
 			_currentSaveSlot = saveSlot;
 			_currentSaveData = new SaveData();
 		}
