@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -12,10 +10,8 @@ namespace SaveSystem.Runtime {
 		private IDataSerializer _dataSerializer;
 		private List<ISaver> _savers = new();
 
-		//TODO: Custom slot name
-		private const string currentSaveName = "Slot 1";
+		public string CurrentSaveSlot;
 
-		[Button]
 		public void Save() {
 			// TODO: 데이터 메모리에 캐싱 후 캐싱된 것 저장 
 			// 새 데이터 만들기
@@ -29,24 +25,26 @@ namespace SaveSystem.Runtime {
 			}
 
 			// 가져온 데이터 저장하기
-			_saveLoader.Save(currentSaveName, saveData);
+			_saveLoader.Save(CurrentSaveSlot, saveData);
+
+			Debug.Log($"[SaveSystem] Saved to {CurrentSaveSlot}");
 		}
 
-		[Button]
 		public void Load() {
 			// 저장된 데이터가 없으면 데이터 초기화
-			if (!_saveLoader.Has(currentSaveName)) {
+			if (!_saveLoader.Has(CurrentSaveSlot)) {
 				ResetData();
 				return;
 			}
 
 			// 데이터 불러오기
-			var saveData = _saveLoader.Load(currentSaveName);
+			var saveData = _saveLoader.Load(CurrentSaveSlot);
 
-			// TODO: 씬 변경
-			// if (saveData.SceneName != SceneManager.GetActiveScene().name) {
-			// 	SceneManager.LoadScene(saveData.SceneName);
-			// }
+			if (saveData == null) {
+				throw new Exception($"[SaveSystem] Failed to load {CurrentSaveSlot}");
+			}
+
+			// TODO: 저장된 씬으로 이동
 
 			// 모든 Saver 데이터 적용
 			foreach (var saver in _savers) {
@@ -54,22 +52,26 @@ namespace SaveSystem.Runtime {
 					saver.ApplyDataWeak(_dataSerializer.Deserialize(data));
 				}
 			}
+
+			Debug.Log($"[SaveSystem] Loaded from {CurrentSaveSlot}");
 		}
 
-		[Button]
 		public void ResetData() {
+			// 모든 Saver의 ResetData 호출
 			foreach (var saver in _savers) {
 				saver.ResetData();
 			}
+
+			Debug.Log($"[SaveSystem] Data reset");
 		}
 
 		public void RegisterSaver(ISaver saver) {
-			Debug.Log($"[SaveSystem] Registering saver {saver.GetType().GetNiceName()}");
+			Debug.Log($"[SaveSystem] Register: {saver.GetType().Name}");
 			_savers.Add(saver);
 		}
 
 		public void UnregisterSaver(ISaver saver) {
-			Debug.Log($"[SaveSystem] Unregistering saver {saver.GetType().GetNiceName()}");
+			Debug.Log($"[SaveSystem] Unregister: {saver.GetType().Name}");
 			_savers.Remove(saver);
 		}
 
@@ -89,9 +91,10 @@ namespace SaveSystem.Runtime {
 		}
 
 		[Inject]
-		public void Construct(ISaveLoader saveLoader, IDataSerializer dataSerializer) {
+		public void Construct(ISaveLoader saveLoader, IDataSerializer dataSerializer, string saveSlot = "Slot") {
 			_saveLoader = saveLoader;
 			_dataSerializer = dataSerializer;
+			CurrentSaveSlot = saveSlot;
 		}
 #endregion
 	}
