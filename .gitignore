@@ -76,3 +76,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 Assets/StreamingAssets/build_info
+
+# Odin Inspector
+Assets/Plugins/Sirenix
+Assets/Plugins/Sirenix.meta
