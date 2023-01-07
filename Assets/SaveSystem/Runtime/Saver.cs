@@ -29,10 +29,25 @@ namespace SaveSystem.Runtime {
 	}
 
 	public abstract class Saver<T> : MonoBehaviour, ISaver<T> {
-		[property: FoldoutGroup("Saver"), ShowInInspector, PropertyOrder(-999)]
-		public string Key { get; } = Guid.NewGuid().ToString();
+		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
+		private string _key;
+		public string Key => _key;
 
-		[ShowInInspector] protected SaveManager _saveManager;
+		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
+		private int _cachedInstanceId = -1;
+
+		[FoldoutGroup("Saver"), ShowInInspector, ReadOnly]
+		private SaveManager _saveManager;
+
+#if UNITY_EDITOR
+		private void OnValidate() {
+			// Key가 할당되지 않았거나, 인스턴스 아이디가 변경되었을 때(복제되었을 때)
+			if (_key == null || _cachedInstanceId != GetInstanceID()) {
+				_key = Guid.NewGuid().ToString();
+				_cachedInstanceId = GetInstanceID();
+			}
+		}
+#endif
 
 		[Inject]
 		public void Construct(SaveManager manager) {
