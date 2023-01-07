@@ -167,8 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f432c8662ad40fba87f05eca2620e3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 949b73c3-da99-4abf-89c2-84f44279f847
-  _cachedInstanceId: 34032
+  _keyType: 0
+  _key: CounterSaver_Counter Saver
+  _cachedInstanceId: 34198
   _text: {fileID: 1692188311}
   _value: 0
 --- !u!1 &519420028

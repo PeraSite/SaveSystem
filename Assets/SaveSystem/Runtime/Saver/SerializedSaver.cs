@@ -6,23 +6,34 @@ using Zenject;
 
 namespace SaveSystem.Runtime {
 	public abstract class SerializedSaver<T> : SerializedMonoBehaviour, ISaver<T> {
-		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
+		[FoldoutGroup("Saver"), SerializeField, OnValueChanged("GenerateKey")]
+		private KeyType _keyType;
+
+		[FoldoutGroup("Saver"), SerializeField]
 		private string _key;
 		public string Key => _key;
 
 		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
 		private int _cachedInstanceId = -1;
 
-		[FoldoutGroup("Saver"), ShowInInspector, ReadOnly]
 		private SaveManager _saveManager;
 
 #if UNITY_EDITOR
 		private void OnValidate() {
 			// Key가 할당되지 않았거나, 인스턴스 아이디가 변경되었을 때(복제되었을 때)
 			if (_key == null || _cachedInstanceId != GetInstanceID()) {
-				_key = Guid.NewGuid().ToString();
+				_key = GenerateKey();
 				_cachedInstanceId = GetInstanceID();
 			}
+		}
+
+		private string GenerateKey() {
+			return _keyType switch {
+				KeyType.Guid => Guid.NewGuid().ToString(),
+				KeyType.Type_Name => $"{GetType().Name}_{name}",
+				KeyType.Name => name,
+				_ => throw new ArgumentOutOfRangeException()
+			};
 		}
 #endif
 
