@@ -167,7 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f432c8662ad40fba87f05eca2620e3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _text: {fileID: 0}
+  _key: d03ca61d-fbb8-41be-b3b7-f1654c8a9e6a
+  _cachedInstanceId: 34522
+  _text: {fileID: 1692188311}
   _value: 0
 --- !u!1 &519420028
 GameObject:

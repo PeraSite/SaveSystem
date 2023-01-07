@@ -9,14 +9,17 @@ namespace SaveSystem.Samples {
 
 		public void Increase() {
 			_value++;
+			_text.text = _value.ToString();
 		}
 
 		public override void ResetData() {
 			_value = 0;
+			_text.text = _value.ToString();
 		}
 
 		public override void ApplyData(int data) {
 			_value = data;
+			_text.text = _value.ToString();
 		}
 
 		public override int SaveData() {

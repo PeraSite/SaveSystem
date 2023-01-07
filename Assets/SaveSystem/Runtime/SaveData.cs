@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SaveSystem.Runtime {
-	public struct SaveData {
+	public class SaveData {
 		public string SceneName;
 
 		public Dictionary<string, string> Data;
+
+		public SaveData() {
+			Data = new Dictionary<string, string>();
+		}
 	}
 }
