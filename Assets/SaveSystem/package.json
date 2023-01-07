@@ -20,9 +20,9 @@
   "unity": "2021.1",
   "samples": [
     {
-      "displayName": "Demo",
-      "description": "Save System Demo",
-      "path": "Samples~/Demo"
+      "displayName": "Simple Counter",
+      "description": "Save/Load a simple counter value",
+      "path": "Samples/Simple Counter"
     }
   ]
 }
