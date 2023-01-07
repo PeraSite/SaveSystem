@@ -21,8 +21,8 @@
   "samples": [
     {
       "displayName": "Demo",
-      "description": "Demo program to show how to use the Save System",
-      "path": "Samples"
+      "description": "Demo programs to show how to use the Save System",
+      "path": "Samples/Demo"
     }
   ]
 }
