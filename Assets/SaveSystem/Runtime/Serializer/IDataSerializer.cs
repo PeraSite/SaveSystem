@@ -2,5 +2,6 @@
 	public interface IDataSerializer {
 		public string Serialize<T>(T value);
 		public T Deserialize<T>(string text);
+		public object Deserialize(string text);
 	}
 }
