@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dddd3bb94f54ac68973106a66124f7e, type: 3}
   m_Name: Odin Data Serializer
   m_EditorClassIdentifier: 
+  _dataFormat: 1

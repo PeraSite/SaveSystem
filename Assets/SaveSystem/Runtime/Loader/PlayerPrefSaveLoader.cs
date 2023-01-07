@@ -8,10 +8,12 @@ namespace SaveSystem.Runtime {
 		public void Save(string saveName, SaveData saveData) {
 			var serializedData = _dataSerializer.Serialize(saveData);
 			PlayerPrefs.SetString(saveName, serializedData);
+			Debug.Log($"[PlayerPrefSaveLoader] Saved {serializedData}");
 		}
 
 		public SaveData Load(string saveName) {
 			var serializedData = PlayerPrefs.GetString(saveName);
+			Debug.Log($"[PlayerPrefSaveLoader] Loaded {serializedData}");
 			return _dataSerializer.Deserialize<SaveData>(serializedData);
 		}
 

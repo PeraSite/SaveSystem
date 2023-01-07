@@ -10,7 +10,8 @@ namespace SaveSystem.Runtime {
 		private IDataSerializer _dataSerializer;
 		private List<ISaver> _savers = new();
 
-		public string CurrentSaveSlot;
+		private SaveData _currentSaveData;
+		private string _currentSaveSlot;
 
 		public void Save() {
 			// TODO: 데이터 메모리에 캐싱 후 캐싱된 것 저장 
@@ -25,23 +26,17 @@ namespace SaveSystem.Runtime {
 			}
 
 			// 가져온 데이터 저장하기
-			_saveLoader.Save(CurrentSaveSlot, saveData);
+			_saveLoader.Save(_currentSaveSlot, saveData);
 
-			Debug.Log($"[SaveSystem] Saved to {CurrentSaveSlot}");
+			Debug.Log($"[SaveSystem] Saved to {_currentSaveSlot}");
 		}
 
 		public void Load() {
-			// 저장된 데이터가 없으면 데이터 초기화
-			if (!_saveLoader.Has(CurrentSaveSlot)) {
-				ResetData();
-				return;
-			}
-
 			// 데이터 불러오기
-			var saveData = _saveLoader.Load(CurrentSaveSlot);
+			var saveData = _saveLoader.Load(_currentSaveSlot);
 
 			if (saveData == null) {
-				throw new Exception($"[SaveSystem] Failed to load {CurrentSaveSlot}");
+				throw new Exception($"[SaveSystem] Failed to load {_currentSaveSlot}");
 			}
 
 			// TODO: 저장된 씬으로 이동
@@ -53,7 +48,7 @@ namespace SaveSystem.Runtime {
 				}
 			}
 
-			Debug.Log($"[SaveSystem] Loaded from {CurrentSaveSlot}");
+			Debug.Log($"[SaveSystem] Loaded from {_currentSaveSlot}");
 		}
 
 		public void ResetData() {
@@ -77,7 +72,13 @@ namespace SaveSystem.Runtime {
 
 		public void Initialize() {
 			Debug.Log("[SaveSystem] Initialized");
-			Load();
+
+			// 저장된 데이터가 없으면 데이터 초기화
+			if (_saveLoader.Has(_currentSaveSlot)) {
+				Load();
+			} else {
+				ResetData();
+			}
 		}
 
 		public void Dispose() {
@@ -94,7 +95,8 @@ namespace SaveSystem.Runtime {
 		public void Construct(ISaveLoader saveLoader, IDataSerializer dataSerializer, string saveSlot = "Slot") {
 			_saveLoader = saveLoader;
 			_dataSerializer = dataSerializer;
-			CurrentSaveSlot = saveSlot;
+			_currentSaveSlot = saveSlot;
+			_currentSaveData = new SaveData();
 		}
 #endregion
 	}
