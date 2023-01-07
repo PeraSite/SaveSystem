@@ -167,8 +167,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f432c8662ad40fba87f05eca2620e3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _key: 5d3cb78a-f473-467a-bd74-56d69a5e04bc
-  _cachedInstanceId: 25360
+  _key: 949b73c3-da99-4abf-89c2-84f44279f847
+  _cachedInstanceId: 34032
   _text: {fileID: 1692188311}
   _value: 0
 --- !u!1 &519420028
@@ -521,11 +521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89715ad69b973a14899afa2c6730b30b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _scriptableObjectInstallers:
-  - {fileID: 11400000, guid: 7c1f3f358ec673e468a8a73d718384cd, type: 2}
-  - {fileID: 11400000, guid: 1c7de57271bd28345ae73b751e488795, type: 2}
-  - {fileID: 11400000, guid: eff2c7cd185db304cb3510a210ebcee7, type: 2}
-  - {fileID: 11400000, guid: 7a0767deb8c3b45489c56592fbd053bb, type: 2}
+  _scriptableObjectInstallers: []
   _monoInstallers: []
   _installerPrefabs: []
   _findSiblingMonoInstallers: 0
