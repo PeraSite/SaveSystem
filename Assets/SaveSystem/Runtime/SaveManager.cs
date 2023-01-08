@@ -38,7 +38,10 @@ namespace SaveSystem.Runtime {
 		}
 
 		public void ApplySnapshot() {
-			var dataMap = CurrentSnapshot.Data[SlotName];
+			if (!CurrentSnapshot.Data.TryGetValue(SlotName, out var dataMap)) {
+				ResetSavers();
+				return;
+			}
 
 			// 데이터 로드
 			foreach (var saver in _savers) {
@@ -49,6 +52,14 @@ namespace SaveSystem.Runtime {
 				}
 			}
 			Debug.Log("[SaveManager] Snapshot applied");
+		}
+
+		public void ResetSavers() {
+			// 모든 Saver의 ResetData 호출
+			foreach (var saver in _savers) {
+				saver.ResetData();
+			}
+			Debug.Log("[SaveManager] All savers reset");
 		}
 
 		public void Save() {
@@ -71,12 +82,6 @@ namespace SaveSystem.Runtime {
 		public void ResetData() {
 			// CurrentSnapshot 초기화
 			CurrentSnapshot = new SaveData();
-
-			// 모든 Saver의 ResetData 호출
-			foreach (var saver in _savers) {
-				saver.ResetData();
-			}
-
 			Debug.Log($"[SaveSystem] Data reset");
 		}
 
@@ -97,12 +102,35 @@ namespace SaveSystem.Runtime {
 				ApplySnapshot();
 			} else {
 				ResetData();
+				ResetSavers();
 			}
 		}
 
 		public void Dispose() {
 			MakeSnapshot();
 			Save();
+		}
+
+		public void StartGame(string startSceneName) {
+			StartGameAsync(startSceneName).Forget();
+		}
+
+		private async UniTask StartGameAsync(string startSceneName) {
+			await _sceneTransition.StartTransition();
+			await _sceneLoader.LoadSceneAsync(startSceneName);
+			ApplySnapshot();
+			await _sceneTransition.EndTransition();
+		}
+
+		public void NewGame(string startSceneName) {
+			NewGameAsync(startSceneName).Forget();
+		}
+
+		private async UniTask NewGameAsync(string startSceneName) {
+			await _sceneTransition.StartTransition();
+			await _sceneLoader.LoadSceneAsync(startSceneName);
+			ResetSavers();
+			await _sceneTransition.EndTransition();
 		}
 
 		public void ChangeScene(string sceneName) {

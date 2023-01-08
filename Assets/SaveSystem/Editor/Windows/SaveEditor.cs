@@ -59,7 +59,7 @@ namespace SaveSystem.Editor {
 			public readonly Dictionary<string, Dictionary<string, ValueWrapper>> Data;
 
 			public SerializedSaveData(SaveData original) {
-				SceneName = "";
+				SceneName = original.SceneName;
 				Data = new Dictionary<string, Dictionary<string, ValueWrapper>>();
 
 				foreach (var (identifier, valueMap) in original.Data) {
