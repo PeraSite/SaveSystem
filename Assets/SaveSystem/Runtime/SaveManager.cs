@@ -44,12 +44,12 @@ namespace SaveSystem.Runtime {
 
 		public void Save() {
 			MakeSnapshot();
-			_dataStorage.Save(CurrentSaveSlot, CurrentSaveData);
+			_dataStorage.Save(CurrentSaveSlot, _dataSerializer.Serialize(CurrentSaveData));
 			Debug.Log($"[SaveSystem] Saved to {CurrentSaveSlot}");
 		}
 
 		public void Load() {
-			CurrentSaveData = _dataStorage.Load(CurrentSaveSlot);
+			CurrentSaveData = _dataSerializer.Deserialize<SaveData>(_dataStorage.Load(CurrentSaveSlot));
 
 			if (CurrentSaveData == null) {
 				throw new Exception($"[SaveSystem] Failed to load {CurrentSaveSlot}");
