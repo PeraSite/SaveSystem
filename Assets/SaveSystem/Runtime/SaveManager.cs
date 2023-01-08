@@ -15,7 +15,7 @@ namespace SaveSystem.Runtime {
 		[Inject] private ZenjectSceneLoader _sceneLoader;
 
 		// State
-		[InjectOptional] public string CurrentSaveSlot = "Slot";
+		[InjectOptional] public string CurrentSaveSlot = "Default Slot";
 		public SaveData CurrentSaveData { get; private set; } = new();
 		[InjectOptional] private readonly List<ISaver> _savers = new();
 
