@@ -4,10 +4,10 @@ namespace SaveSystem.Runtime {
 	public class SaveData {
 		public string SceneName;
 
-		public Dictionary<string, string> Data;
+		public readonly Dictionary<string, Dictionary<string, string>> Data;
 
 		public SaveData() {
-			Data = new Dictionary<string, string>();
+			Data = new Dictionary<string, Dictionary<string, string>>();
 		}
 	}
 }

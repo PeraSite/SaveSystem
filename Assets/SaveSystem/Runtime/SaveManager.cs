@@ -7,33 +7,42 @@ using Zenject;
 
 namespace SaveSystem.Runtime {
 	public class SaveManager : IInitializable, IDisposable {
+		public const string SAVE_FILE_KEY = "save";
+
 		// Dependencies
-		[Inject] private IDataStorage _dataStorage;
-		[Inject] private IDataSerializer _dataSerializer;
-		[Inject] private ISceneTransition _sceneTransition;
-		[Inject] private ZenjectSceneLoader _sceneLoader;
+		[Inject] private readonly IDataStorage _dataStorage;
+		[Inject] private readonly IDataSerializer _dataSerializer;
+		[Inject] private readonly ISceneTransition _sceneTransition;
+		[Inject] private readonly ZenjectSceneLoader _sceneLoader;
+		[InjectOptional] private readonly List<ISaver> _savers = new();
 
 		// State
-		[InjectOptional] public string CurrentSaveSlot = "Default Slot";
-		public SaveData CurrentSaveData { get; private set; } = new();
-		[InjectOptional] private readonly List<ISaver> _savers = new();
+		public SaveData CurrentSnapshot { get; private set; }
+		[InjectOptional] public string SlotName = "Default Slot";
 
 		public void MakeSnapshot() {
 			// 씬 이름 저장
-			CurrentSaveData.SceneName = SceneManager.GetActiveScene().name;
+			CurrentSnapshot.SceneName = SceneManager.GetActiveScene().name;
+
+			// 슬롯에 데이터 없으면 새로 생성
+			if (!CurrentSnapshot.Data.ContainsKey(SlotName)) {
+				CurrentSnapshot.Data.Add(SlotName, new Dictionary<string, string>());
+			}
 
 			// 데이터 저장
 			foreach (var saver in _savers) {
-				CurrentSaveData.Data[saver.Key] = _dataSerializer.Serialize(saver.SaveDataWeak());
+				CurrentSnapshot.Data[SlotName][saver.Key] = _dataSerializer.Serialize(saver.SaveDataWeak());
 			}
 
 			Debug.Log("[SaveManager] Snapshot created");
 		}
 
 		public void ApplySnapshot() {
+			var dataMap = CurrentSnapshot.Data[SlotName];
+
 			// 데이터 로드
 			foreach (var saver in _savers) {
-				if (CurrentSaveData.Data.TryGetValue(saver.Key, out var data)) {
+				if (dataMap.TryGetValue(saver.Key, out var data)) {
 					var value = _dataSerializer.Deserialize(data);
 					if (value == null) continue;
 					saver.ApplyDataWeak(value);
@@ -43,28 +52,26 @@ namespace SaveSystem.Runtime {
 		}
 
 		public void Save() {
-			MakeSnapshot();
-			_dataStorage.Save(CurrentSaveSlot, _dataSerializer.Serialize(CurrentSaveData));
-			Debug.Log($"[SaveSystem] Saved to {CurrentSaveSlot}");
+			var serializedSaveData = _dataSerializer.Serialize(CurrentSnapshot);
+			_dataStorage.Save(SAVE_FILE_KEY, serializedSaveData);
+			Debug.Log($"[SaveSystem] Data Saved : {serializedSaveData}");
 		}
 
 		public void Load() {
-			CurrentSaveData = _dataSerializer.Deserialize<SaveData>(_dataStorage.Load(CurrentSaveSlot));
-
-			if (CurrentSaveData == null) {
-				throw new Exception($"[SaveSystem] Failed to load {CurrentSaveSlot}");
-			}
-
-			ApplySnapshot();
-			Debug.Log($"[SaveSystem] Loaded from {CurrentSaveSlot}");
+			var saveDataString = _dataStorage.Load(SAVE_FILE_KEY);
+			CurrentSnapshot = _dataSerializer.Deserialize<SaveData>(saveDataString);
+			Debug.Log($"[SaveSystem] Data Loaded : {saveDataString}");
 		}
 
 		public void Delete() {
-			_dataStorage.Delete(CurrentSaveSlot);
-			Debug.Log($"[SaveSystem] Deleted {CurrentSaveSlot}");
+			_dataStorage.Delete(SAVE_FILE_KEY);
+			Debug.Log($"[SaveSystem] Data Deleted");
 		}
 
 		public void ResetData() {
+			// CurrentSnapshot 초기화
+			CurrentSnapshot = new SaveData();
+
 			// 모든 Saver의 ResetData 호출
 			foreach (var saver in _savers) {
 				saver.ResetData();
@@ -85,14 +92,16 @@ namespace SaveSystem.Runtime {
 
 		public void Initialize() {
 			// 저장된 데이터가 없으면 데이터 초기화
-			if (_dataStorage.Has(CurrentSaveSlot)) {
+			if (_dataStorage.Has(SAVE_FILE_KEY)) {
 				Load();
+				ApplySnapshot();
 			} else {
 				ResetData();
 			}
 		}
 
 		public void Dispose() {
+			MakeSnapshot();
 			Save();
 		}
 
@@ -100,7 +109,7 @@ namespace SaveSystem.Runtime {
 			ChangeSceneAsync(sceneName).Forget();
 		}
 
-		private async UniTask ChangeSceneAsync(string sceneName) {
+		public async UniTask ChangeSceneAsync(string sceneName) {
 			await _sceneTransition.StartTransition();
 			MakeSnapshot();
 			await _sceneLoader.LoadSceneAsync(sceneName);
