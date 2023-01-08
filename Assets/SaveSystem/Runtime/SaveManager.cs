@@ -8,7 +8,7 @@ using Zenject;
 namespace SaveSystem.Runtime {
 	public class SaveManager : IInitializable, IDisposable {
 		// Dependencies
-		private ISaveLoader _saveLoader;
+		private IDataStorage _dataStorage;
 		private IDataSerializer _dataSerializer;
 		private ISceneTransition _sceneTransition;
 		private ZenjectSceneLoader _sceneLoader;
@@ -18,41 +18,48 @@ namespace SaveSystem.Runtime {
 		private SaveData _currentSaveData;
 		private string _currentSaveSlot;
 
-		public void Save() {
-			// TODO: 데이터 메모리에 캐싱 후 캐싱된 것 저장 
-			// 새 데이터 만들기
-			var saveData = new SaveData();
+		public SaveData CurrentSaveData => _currentSaveData;
 
-			// 모든 Saver 데이터 가져오기
+		public void MakeSnapshot() {
+			// 씬 이름 저장
+			_currentSaveData.SceneName = SceneManager.GetActiveScene().name;
+			
+			// 데이터 저장
 			foreach (var saver in _savers) {
-				saveData.SceneName = SceneManager.GetActiveScene().name;
-				var data = saver.SaveDataWeak();
-				saveData.Data[saver.Key] = _dataSerializer.Serialize(data);
+				_currentSaveData.Data[saver.Key] = _dataSerializer.Serialize(saver.SaveDataWeak());
 			}
+			
+			Debug.Log("[SaveManager] Snapshot created");
+		}
 
-			// 가져온 데이터 저장하기
-			_saveLoader.Save(_currentSaveSlot, saveData);
+		public void ApplySnapshot() {
+			// TODO: 씬 불러오기
 
+			// 데이터 로드
+			foreach (var saver in _savers) {
+				if (_currentSaveData.Data.TryGetValue(saver.Key, out var data)) {
+					var value = _dataSerializer.Deserialize(data);
+					if (value == null) continue;
+					saver.ApplyDataWeak(value);
+				}
+			}
+			Debug.Log("[SaveManager] Snapshot applied");
+		}
+
+		public void Save() {
+			MakeSnapshot();
+			_dataStorage.Save(_currentSaveSlot, _currentSaveData);
 			Debug.Log($"[SaveSystem] Saved to {_currentSaveSlot}");
 		}
 
 		public void Load() {
-			// 데이터 불러오기
-			var saveData = _saveLoader.Load(_currentSaveSlot);
+			_currentSaveData = _dataStorage.Load(_currentSaveSlot);
 
-			if (saveData == null) {
+			if (_currentSaveData == null) {
 				throw new Exception($"[SaveSystem] Failed to load {_currentSaveSlot}");
 			}
 
-			// TODO: 저장된 씬으로 이동
-
-			// 모든 Saver 데이터 적용
-			foreach (var saver in _savers) {
-				if (saveData.Data.TryGetValue(saver.Key, out var data)) {
-					saver.ApplyDataWeak(_dataSerializer.Deserialize(data));
-				}
-			}
-
+			ApplySnapshot();
 			Debug.Log($"[SaveSystem] Loaded from {_currentSaveSlot}");
 		}
 
@@ -76,10 +83,8 @@ namespace SaveSystem.Runtime {
 		}
 
 		public void Initialize() {
-			Debug.Log("[SaveSystem] Initialized");
-
 			// 저장된 데이터가 없으면 데이터 초기화
-			if (_saveLoader.Has(_currentSaveSlot)) {
+			if (_dataStorage.Has(_currentSaveSlot)) {
 				Load();
 			} else {
 				ResetData();
@@ -87,7 +92,6 @@ namespace SaveSystem.Runtime {
 		}
 
 		public void Dispose() {
-			Debug.Log("[SaveSystem] Disposed");
 			Save();
 		}
 
@@ -97,16 +101,17 @@ namespace SaveSystem.Runtime {
 
 		private async UniTask ChangeSceneAsync(string sceneName) {
 			await _sceneTransition.StartTransition();
-			Save();
+			MakeSnapshot();
 			await _sceneLoader.LoadSceneAsync(sceneName);
-			Load();
+			ApplySnapshot();
 			await _sceneTransition.EndTransition();
 		}
 
 		[Inject]
-		public void Construct(ISaveLoader saveLoader, IDataSerializer dataSerializer, ISceneTransition sceneTransition,
+		public void Construct(IDataStorage dataStorage, IDataSerializer dataSerializer,
+			ISceneTransition sceneTransition,
 			ZenjectSceneLoader sceneLoader, string saveSlot = "Slot") {
-			_saveLoader = saveLoader;
+			_dataStorage = dataStorage;
 			_dataSerializer = dataSerializer;
 			_sceneTransition = sceneTransition;
 			_sceneLoader = sceneLoader;
