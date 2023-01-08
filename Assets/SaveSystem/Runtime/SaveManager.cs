@@ -17,7 +17,7 @@ namespace SaveSystem.Runtime {
 		// State
 		[InjectOptional] public string CurrentSaveSlot = "Slot";
 		public SaveData CurrentSaveData { get; private set; } = new();
-		private readonly List<ISaver> _savers = new();
+		[InjectOptional] private readonly List<ISaver> _savers = new();
 
 		public void MakeSnapshot() {
 			// 씬 이름 저장
