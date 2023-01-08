@@ -8,7 +8,7 @@ namespace SaveSystem.Samples.Scripts {
 		[SerializeField] private float _animationTime;
 
 		public override void InstallBindings() {
-			// 세세한 구현체는 Self Bind 하지 않고 인터페이스만 등록
+			// 구현체는 Self Bind 하지 않고 인터페이스만 등록
 			Container.BindInterfacesTo<OdinDataSerializer>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<PlayerPrefDataStorage>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<FadeSceneTransition>().AsSingle().WithArguments(_fade, _animationTime).NonLazy();

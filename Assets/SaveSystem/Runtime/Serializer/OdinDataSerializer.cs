@@ -6,7 +6,8 @@ using Zenject;
 
 namespace SaveSystem.Runtime {
 	public class OdinDataSerializer : IDataSerializer {
-		private DataFormat _dataFormat;
+		[InjectOptional]
+		private DataFormat _dataFormat = DataFormat.JSON;
 
 		public string Serialize<T>(T value) {
 			return Encoding.UTF8.GetString(SerializationUtility.SerializeValue(value, _dataFormat));
@@ -20,11 +21,6 @@ namespace SaveSystem.Runtime {
 		public object Deserialize(string text) {
 			if (text.IsNullOrWhitespace()) return null;
 			return SerializationUtility.DeserializeValueWeak(Encoding.UTF8.GetBytes(text), _dataFormat);
-		}
-
-		[Inject]
-		public void Construct(DataFormat dataFormat = DataFormat.JSON) {
-			_dataFormat = dataFormat;
 		}
 	}
 }

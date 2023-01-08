@@ -5,8 +5,8 @@ using Zenject;
 
 namespace SaveSystem.Runtime {
 	public class FadeSceneTransition : ISceneTransition {
-		private CanvasGroup _fade;
-		private float _animationTime;
+		[Inject] private CanvasGroup _fade;
+		[Inject] private float _animationTime;
 
 		public async UniTask StartTransition() {
 			_fade.DOKill();
@@ -20,12 +20,6 @@ namespace SaveSystem.Runtime {
 			_fade.alpha = 1f;
 			await _fade.DOFade(0f, _animationTime).AsyncWaitForCompletion();
 			_fade.gameObject.SetActive(false);
-		}
-
-		[Inject]
-		public void Construct(CanvasGroup fade, float animationTime) {
-			_fade = fade;
-			_animationTime = animationTime;
 		}
 	}
 }

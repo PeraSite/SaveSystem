@@ -3,6 +3,7 @@ using Zenject;
 
 namespace SaveSystem.Runtime {
 	public class PlayerPrefDataStorage : IDataStorage {
+		[Inject]
 		private IDataSerializer _dataSerializer;
 
 		public void Save(string saveName, SaveData saveData) {
@@ -23,11 +24,6 @@ namespace SaveSystem.Runtime {
 
 		public bool Has(string saveName) {
 			return PlayerPrefs.HasKey(saveName);
-		}
-
-		[Inject]
-		public void Construct(IDataSerializer dataSerializer) {
-			_dataSerializer = dataSerializer;
 		}
 	}
 }
