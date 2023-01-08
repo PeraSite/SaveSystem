@@ -19,22 +19,21 @@ namespace SaveSystem.Runtime {
 		private string _currentSaveSlot;
 
 		public SaveData CurrentSaveData => _currentSaveData;
+		public string CurrentSaveSlot => _currentSaveSlot;
 
 		public void MakeSnapshot() {
 			// 씬 이름 저장
 			_currentSaveData.SceneName = SceneManager.GetActiveScene().name;
-			
+
 			// 데이터 저장
 			foreach (var saver in _savers) {
 				_currentSaveData.Data[saver.Key] = _dataSerializer.Serialize(saver.SaveDataWeak());
 			}
-			
+
 			Debug.Log("[SaveManager] Snapshot created");
 		}
 
 		public void ApplySnapshot() {
-			// TODO: 씬 불러오기
-
 			// 데이터 로드
 			foreach (var saver in _savers) {
 				if (_currentSaveData.Data.TryGetValue(saver.Key, out var data)) {
@@ -61,6 +60,11 @@ namespace SaveSystem.Runtime {
 
 			ApplySnapshot();
 			Debug.Log($"[SaveSystem] Loaded from {_currentSaveSlot}");
+		}
+
+		public void Delete() {
+			_dataStorage.Delete(_currentSaveSlot);
+			Debug.Log($"[SaveSystem] Deleted {_currentSaveSlot}");
 		}
 
 		public void ResetData() {
