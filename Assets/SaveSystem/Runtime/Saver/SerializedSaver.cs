@@ -13,27 +13,19 @@ namespace SaveSystem.Runtime {
 		private string _key;
 		public string Key => _key;
 
-		[FoldoutGroup("Saver"), SerializeField, ReadOnly]
-		private int _cachedInstanceId = -1;
-
 		private SaveManager _saveManager;
 
+#if UNITY_EDITOR
 		private void OnValidate() {
-			// Key가 할당되지 않았거나, 인스턴스 아이디가 변경되었을 때(복제되었을 때)
-			if (_key == null || _cachedInstanceId != GetInstanceID()) {
-				_key = GenerateKey();
-				_cachedInstanceId = GetInstanceID();
-			}
-		}
-
-		private string GenerateKey() {
-			return _keyType switch {
+			// Key가 할당되지 않았으면 새로 할당
+			_key ??= _keyType switch {
 				KeyType.Guid => Guid.NewGuid().ToString(),
 				KeyType.Type_Name => $"{GetType().Name}_{name}",
 				KeyType.Name => name,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 		}
+#endif
 
 		[Inject]
 		public void Construct(SaveManager manager) {
