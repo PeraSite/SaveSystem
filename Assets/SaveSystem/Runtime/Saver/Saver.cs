@@ -33,7 +33,6 @@ namespace SaveSystem.Runtime {
 
 		private SaveManager _saveManager;
 
-#if UNITY_EDITOR
 		private void OnValidate() {
 			// Key가 할당되지 않았거나, 인스턴스 아이디가 변경되었을 때(복제되었을 때)
 			if (_key == null || _cachedInstanceId != GetInstanceID()) {
@@ -50,7 +49,6 @@ namespace SaveSystem.Runtime {
 				_ => throw new ArgumentOutOfRangeException()
 			};
 		}
-#endif
 
 		[Inject]
 		public void Construct(SaveManager manager) {
