@@ -26,12 +26,12 @@ namespace SaveSystem.Runtime {
 
 			// 슬롯에 데이터 없으면 새로 생성
 			if (!CurrentSnapshot.Data.ContainsKey(SlotName)) {
-				CurrentSnapshot.Data.Add(SlotName, new Dictionary<string, string>());
+				CurrentSnapshot.Data.Add(SlotName, new Dictionary<string, object>());
 			}
 
 			// 데이터 저장
 			foreach (var saver in _savers) {
-				CurrentSnapshot.Data[SlotName][saver.Key] = _dataSerializer.Serialize(saver.SaveDataWeak());
+				CurrentSnapshot.Data[SlotName][saver.Key] = saver.SaveDataWeak();
 			}
 
 			Debug.Log("[SaveManager] Snapshot created");
@@ -45,9 +45,7 @@ namespace SaveSystem.Runtime {
 
 			// 데이터 로드
 			foreach (var saver in _savers) {
-				if (dataMap.TryGetValue(saver.Key, out var data)) {
-					var value = _dataSerializer.Deserialize(data);
-					if (value == null) continue;
+				if (dataMap.TryGetValue(saver.Key, out var value)) {
 					saver.ApplyDataWeak(value);
 				}
 			}

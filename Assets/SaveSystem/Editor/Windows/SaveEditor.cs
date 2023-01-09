@@ -65,8 +65,7 @@ namespace SaveSystem.Editor {
 				foreach (var (identifier, valueMap) in original.Data) {
 					Data[identifier] = valueMap.ToDictionary(pair => pair.Key,
 						pair => new ValueWrapper {
-							value = SerializationUtility.DeserializeValueWeak(Encoding.UTF8.GetBytes(pair.Value),
-								DataFormat.JSON)
+							value = pair.Value
 						});
 				}
 			}

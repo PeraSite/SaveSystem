@@ -169,7 +169,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _keyType: 0
   _key: CounterSaver_Counter Saver
-  _cachedInstanceId: 34198
   _text: {fileID: 1692188311}
   _value: 0
 --- !u!1 &519420028
