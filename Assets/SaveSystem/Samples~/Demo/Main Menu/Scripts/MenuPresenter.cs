@@ -1,5 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
-using SaveSystem.Runtime;
+﻿using SaveSystem.Runtime;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +8,6 @@ namespace SaveSystem.Samples {
 	public class MenuPresenter : MonoBehaviour {
 		[SerializeField] private Button[] _slotButtons;
 		[SerializeField] private TextMeshProUGUI[] _slotSceneNames;
-
 		[SerializeField] private string _startingScene;
 
 		private SaveManager _saveManager;

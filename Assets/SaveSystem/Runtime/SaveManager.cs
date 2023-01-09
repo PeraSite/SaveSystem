@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -12,8 +11,7 @@ namespace SaveSystem.Runtime {
 		// Dependencies
 		[Inject] private readonly IDataStorage _dataStorage;
 		[Inject] private readonly IDataSerializer _dataSerializer;
-		[Inject] private readonly ISceneTransition _sceneTransition;
-		[Inject] private readonly ZenjectSceneLoader _sceneLoader;
+		[Inject] private readonly SceneTransitionManager _sceneTransitionManager;
 		[InjectOptional] private readonly List<ISaver> _savers = new();
 
 		// State
@@ -111,26 +109,15 @@ namespace SaveSystem.Runtime {
 
 #region Scene Management
 		public void StartGame(string startSceneName) {
-			ChangeSceneAsync(startSceneName, afterSceneChange: ApplySnapshot).Forget();
+			_sceneTransitionManager.ChangeScene(startSceneName, afterSceneChange: ApplySnapshot);
 		}
 
 		public void NewGame(string startSceneName) {
-			ChangeSceneAsync(startSceneName, afterSceneChange: ResetSavers).Forget();
+			_sceneTransitionManager.ChangeScene(startSceneName, afterSceneChange: ResetSavers);
 		}
 
 		public void ChangeScene(string sceneName) {
-			ChangeSceneAsync(sceneName, MakeSnapshot, ApplySnapshot).Forget();
-		}
-
-		private async UniTask ChangeSceneAsync(string sceneName,
-			Action beforeSceneChange = null,
-			Action afterSceneChange = null
-		) {
-			await _sceneTransition.StartTransition();
-			beforeSceneChange?.Invoke();
-			await _sceneLoader.LoadSceneAsync(sceneName);
-			afterSceneChange?.Invoke();
-			await _sceneTransition.EndTransition();
+			_sceneTransitionManager.ChangeScene(sceneName, MakeSnapshot, ApplySnapshot);
 		}
 #endregion
 	}
