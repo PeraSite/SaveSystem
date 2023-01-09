@@ -109,38 +109,29 @@ namespace SaveSystem.Runtime {
 			Save();
 		}
 
+#region Scene Management
 		public void StartGame(string startSceneName) {
-			StartGameAsync(startSceneName).Forget();
-		}
-
-		private async UniTask StartGameAsync(string startSceneName) {
-			await _sceneTransition.StartTransition();
-			await _sceneLoader.LoadSceneAsync(startSceneName);
-			ApplySnapshot();
-			await _sceneTransition.EndTransition();
+			ChangeSceneAsync(startSceneName, afterSceneChange: ApplySnapshot).Forget();
 		}
 
 		public void NewGame(string startSceneName) {
-			NewGameAsync(startSceneName).Forget();
-		}
-
-		private async UniTask NewGameAsync(string startSceneName) {
-			await _sceneTransition.StartTransition();
-			await _sceneLoader.LoadSceneAsync(startSceneName);
-			ResetSavers();
-			await _sceneTransition.EndTransition();
+			ChangeSceneAsync(startSceneName, afterSceneChange: ResetSavers).Forget();
 		}
 
 		public void ChangeScene(string sceneName) {
-			ChangeSceneAsync(sceneName).Forget();
+			ChangeSceneAsync(sceneName, MakeSnapshot, ApplySnapshot).Forget();
 		}
 
-		public async UniTask ChangeSceneAsync(string sceneName) {
+		private async UniTask ChangeSceneAsync(string sceneName,
+			Action beforeSceneChange = null,
+			Action afterSceneChange = null
+		) {
 			await _sceneTransition.StartTransition();
-			MakeSnapshot();
+			beforeSceneChange?.Invoke();
 			await _sceneLoader.LoadSceneAsync(sceneName);
-			ApplySnapshot();
+			afterSceneChange?.Invoke();
 			await _sceneTransition.EndTransition();
 		}
+#endregion
 	}
 }
