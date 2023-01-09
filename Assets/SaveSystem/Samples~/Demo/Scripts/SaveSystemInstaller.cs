@@ -2,7 +2,7 @@
 using UnityEngine;
 using Zenject;
 
-namespace SaveSystem.Samples.Scripts {
+namespace SaveSystem.Samples {
 	public class SaveSystemInstaller : MonoInstaller<SaveSystemInstaller> {
 		[SerializeField] private CanvasGroup _fade;
 		[SerializeField] private float _animationTime;
