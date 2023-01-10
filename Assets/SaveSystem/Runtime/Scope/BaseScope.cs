@@ -64,6 +64,13 @@ namespace SaveSystem.Runtime {
 		public T GetSaver<T>() where T : ISaver {
 			return (T) Savers.Values.FirstOrDefault(saver => saver.GetType() == typeof(T));
 		}
+
+		public TValue GetData<TSaver, TValue>() where TSaver : ISaver<TValue> {
+			var saver = GetSaver<TSaver>();
+			if (saver == null) return default;
+			if (!Snapshot.TryGetValue(saver.Key, out var data)) return default;
+			return (TValue) data;
+		}
 	}
 
 	public abstract class BaseScope<TValue> : IScope<TValue> {
