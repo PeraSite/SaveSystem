@@ -10,7 +10,7 @@ using Zenject;
 namespace SaveSystem.Editor {
 	public class SaveEditor : OdinEditorWindow {
 		[ShowInInspector, ReadOnly]
-		private Dictionary<string, object> SaveData => SaveManager?.Snapshot;
+		private Dictionary<string, object> SaveData => SaveManager?.RootScope.Snapshot;
 
 		[ButtonGroup("Storage", VisibleIf = "@SaveManager != null")]
 		private void Save() {
@@ -40,6 +40,22 @@ namespace SaveSystem.Editor {
 			window.Show();
 		}
 
+		protected override void OnEnable() {
+			base.OnEnable();
+			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+		}
+
+		protected override void OnDisable() {
+			base.OnDisable();
+			EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+		}
+
+		private void OnPlayModeStateChanged(PlayModeStateChange state) {
+			if (state == PlayModeStateChange.EnteredEditMode) {
+				_saveManager = null;
+			}
+		}
+
 		[ShowInInspector, EnableIf("HasProjectContext"),
 		 InfoBox("No project context found.", "@!HasProjectContext()", Icon = SdfIconType.ExclamationCircle)]
 		private SaveManager _saveManager;
@@ -47,7 +63,7 @@ namespace SaveSystem.Editor {
 		private SaveManager SaveManager {
 			get {
 				if (_saveManager != null) return _saveManager;
-				_saveManager = ProjectContext.HasInstance
+				_saveManager = HasProjectContext()
 					? ProjectContext.Instance.Container.TryResolve<SaveManager>()
 					: null;
 				return _saveManager;
