@@ -11,26 +11,29 @@ namespace SaveSystem.Runtime {
 		public Dictionary<string, object> Snapshot { get; set; } = new();
 
 		public virtual void ApplyData(Dictionary<string, object> data) {
-			foreach (var (key, value) in data.ToList()) {
-				Snapshot[key] = value;
+			Debug.Log($"[{Key} Scope] ApplyData {new OdinDataSerializer().Serialize(data)}");
 
+			foreach (var (key, value) in data) {
 				if (!Savers.TryGetValue(key, out var saver)) {
-					Debug.Log($"No saver found for key {key}");
+					Debug.Log($"[{Key} Scope] No saver found for key {key}");
 					continue;
 				}
 				saver.ApplyDataWeak(value);
 			}
+			Snapshot = data;
 		}
 
 		public virtual Dictionary<string, object> SaveData() {
-			var newSnapshot = new Dictionary<string, object>(Snapshot);
+			var result = new Dictionary<string, object>(Snapshot);
+			var capturedState = Savers.ToDictionary(pair => pair.Key, pair => pair.Value.SaveDataWeak());
 
-			var currentState = Savers.ToDictionary(pair => pair.Key, pair => pair.Value.SaveDataWeak());
-			foreach (var (key, value) in currentState) {
-				newSnapshot[key] = value;
+			foreach (var (key, value) in capturedState) {
+				Debug.Log($"[{Key} Scope] {key} -> {new OdinDataSerializer().Serialize(value)}");
+				result[key] = value;
 			}
-			Snapshot = newSnapshot;
-			return newSnapshot;
+
+			Snapshot = result;
+			return result;
 		}
 
 		public virtual void ResetData() {

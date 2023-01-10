@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SaveSystem.Runtime;
+using UnityEngine;
 using Zenject;
 
 namespace SaveSystem.Samples {
@@ -44,6 +45,10 @@ namespace SaveSystem.Samples {
 		public int CurrentSlot = EDITOR_SLOT; // 빌드 시 메인화면에서 -1로 설정함
 
 		public override void ApplyData(Dictionary<int, Dictionary<string, object>> data) {
+			Debug.Log($"[{Key} Scope] ApplyData {new OdinDataSerializer().Serialize(data)}");
+
+			Snapshot = data;
+
 			// 현재 슬롯이 지정되지 않으면 리턴
 			if (CurrentSlot == NOT_SELECTED_SLOT) return;
 
@@ -54,15 +59,27 @@ namespace SaveSystem.Samples {
 			foreach (var (key, value) in saverDataMap) {
 				if (!Savers.TryGetValue(key, out var saver)) continue;
 				saver.ApplyDataWeak(value);
-				Snapshot[CurrentSlot][key] = value;
 			}
+
 		}
 
 		public override Dictionary<int, Dictionary<string, object>> SaveData() {
+			var result = new Dictionary<int, Dictionary<string, object>>(Snapshot);
+
 			if (CurrentSlot != NOT_SELECTED_SLOT) {
-				Snapshot[CurrentSlot] = CaptureSaver();
+				if (!result.ContainsKey(CurrentSlot)) {
+					result[CurrentSlot] = new Dictionary<string, object>();
+				}
+
+				var capturedState = CaptureSaver();
+				foreach (var (key, value) in capturedState) {
+					result[CurrentSlot][key] = value;
+					Debug.Log($"[{Key} Scope] Slot {CurrentSlot} / {key} -> {new OdinDataSerializer().Serialize(value)}");
+				}
 			}
-			return Snapshot;
+
+			Snapshot = result;
+			return result;
 		}
 
 		private Dictionary<string, object> CaptureSaver() {

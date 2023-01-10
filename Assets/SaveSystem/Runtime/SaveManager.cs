@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -11,32 +12,28 @@ namespace SaveSystem.Runtime {
 		// Dependencies
 		private IDataStorage _dataStorage;
 		private IDataSerializer _dataSerializer;
-		private IScope<Dictionary<string, object>> _rootScope;
 		private SceneTransitionManager _transitionManager;
-
-		// States
-		// BUG: SaveManager#Snapshot이 _rootScope#Snapshot과 동기화되지 않음
-		public Dictionary<string, object> Snapshot = new();
+		public IScope<Dictionary<string, object>> RootScope;
 
 		public void ApplySnapshot() {
-			_rootScope.ApplyData(Snapshot);
+			RootScope.ApplyData(RootScope.Snapshot);
 			Debug.Log("[SaveManager] ApplySnapshot");
 		}
 
 		public void CaptureSnapshot() {
-			Snapshot = _rootScope.SaveData();
-			Debug.Log($"[SaveManager] CaptureSnapshot: {_dataSerializer.Serialize(Snapshot)}");
+			RootScope.SaveData();
+			Debug.Log($"[SaveManager] CaptureSnapshot: {_dataSerializer.Serialize(RootScope.Snapshot)}");
 		}
 
 		public void Load() {
 			// Storage에서 불러와 캐시에 저장
 			var loaded = _dataStorage.Load(SAVE_KEY);
 			var serialized = _dataSerializer.Deserialize<Dictionary<string, object>>(loaded);
-			Snapshot = serialized ?? throw new Exception($"Can't serialized: {loaded}");
+			var snapshot = serialized ?? throw new Exception($"Can't serialized: {loaded}");
 			Debug.Log($"[SaveManager] Load: {loaded}");
 
-			// 저장된 캐시 적용
-			ApplySnapshot();
+			// 로드된 Snapshot 적용
+			RootScope.ApplyData(snapshot);
 		}
 
 		public void Save() {
@@ -44,13 +41,13 @@ namespace SaveSystem.Runtime {
 			CaptureSnapshot();
 
 			// 캐시를 Storage에 저장
-			var saved = _dataSerializer.Serialize(Snapshot);
+			var saved = _dataSerializer.Serialize(RootScope.Snapshot);
 			_dataStorage.Save(SAVE_KEY, saved);
 			Debug.Log($"[SaveManager] Save: {saved}");
 		}
 
 		public void Reset() {
-			_rootScope.ResetData();
+			RootScope.ResetData();
 			Debug.Log("[SaveManager] Reset");
 		}
 
@@ -73,17 +70,17 @@ namespace SaveSystem.Runtime {
 			IScope<Dictionary<string, object>> rootScope) {
 			_dataStorage = dataStorage;
 			_dataSerializer = dataSerializer;
-			_rootScope = rootScope;
+			RootScope = rootScope;
 			_transitionManager = transitionManager;
 		}
 
 #region Scene Management
 		public void StartGame(string startSceneName) {
-			_transitionManager.ChangeScene(startSceneName, CaptureSnapshot, afterSceneChange: ApplySnapshot);
+			_transitionManager.ChangeScene(startSceneName, CaptureSnapshot, ApplySnapshot);
 		}
 
 		public void NewGame(string startSceneName) {
-			_transitionManager.ChangeScene(startSceneName, CaptureSnapshot, afterSceneChange: Reset);
+			_transitionManager.ChangeScene(startSceneName, CaptureSnapshot, Reset);
 		}
 
 		public void ChangeScene(string sceneName) {
