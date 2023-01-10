@@ -7,6 +7,20 @@ Provides an powerful save system for Unity.
 - **Fast** : All data is cached to memory in tree-like structure.
 - **Supports Editor** : You can save and load data from Editor. _(Only if project installed Odin Inspector)_
 - **Scope-based** : You can implement `IScope` for managing complex data structures like Save Slot.
+
+## Table of Contents
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Dependencies](#dependencies)
+  - [Optional](#optional)
+- [Installation](#installation)
+  - [1. Using UPM(Unity Package Manager)](#1-using-upmunity-package-manager)
+  - [2. Import as source](#2-import-as-source)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Dependencies
 
 > Make sure you installed those dependencies!
