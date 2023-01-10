@@ -16,8 +16,8 @@ Provides an powerful save system for Unity.
 - [Dependencies](#dependencies)
   - [Optional](#optional)
 - [Installation](#installation)
-  - [1. Using UPM(Unity Package Manager)](#1-using-upmunity-package-manager)
-  - [2. Import as source](#2-import-as-source)
+  - [Using UPM(Unity Package Manager)](#using-upmunity-package-manager)
+  - [Import as source](#import-as-source)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -39,7 +39,7 @@ Provides an powerful save system for Unity.
 
 ## Installation
 
-### 1. Using UPM(Unity Package Manager)
+### Using UPM(Unity Package Manager)
 
 This is most recommended way to install the Save System.
 
@@ -48,7 +48,7 @@ This is most recommended way to install the Save System.
 
 Add git url `https://github.com/PeraSite/SaveSystem.git?path=Assets/SaveSystem` to projects.
 
-### 2. Import as source
+### Import as source
 
 1. Clone this repository
 2. Copy `Assets/SaveSystem` folder from repository, to your project
