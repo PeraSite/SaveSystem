@@ -1,22 +1,16 @@
 ﻿#if ODIN_INSPECTOR
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using SaveSystem.Runtime;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
-using Sirenix.Serialization;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
-using SerializationUtility = Sirenix.Serialization.SerializationUtility;
 
 namespace SaveSystem.Editor {
 	public class SaveEditor : OdinEditorWindow {
 		[ShowInInspector, ReadOnly]
-		private SaveData SaveData => SaveManager?.CurrentSnapshot;
+		private Dictionary<string, object> SaveData => SaveManager?.Snapshot;
 
 		[ButtonGroup("Storage", VisibleIf = "@SaveManager != null")]
 		private void Save() {
@@ -28,53 +22,14 @@ namespace SaveSystem.Editor {
 			SaveManager?.Load();
 		}
 
-		[ButtonGroup("Storage")]
-		private void Delete() {
-			SaveManager?.Delete();
-		}
-
 		[ButtonGroup("Snapshot", VisibleIf = "@SaveManager != null")]
 		private void MakeSnapshot() {
-			SaveManager?.MakeSnapshot();
+			SaveManager?.CaptureSnapshot();
 		}
 
 		[ButtonGroup("Snapshot")]
 		private void ApplySnapshot() {
 			SaveManager?.ApplySnapshot();
-		}
-
-		[Button]
-		private SerializedSaveData GetSaveData() {
-			var dataStorage = new PlayerPrefDataStorage();
-			var dataSerializer = new OdinDataSerializer();
-			var saveData = dataSerializer.Deserialize<SaveData>(dataStorage.Load(SaveManager.SAVE_FILE_KEY));
-			return new SerializedSaveData(saveData);
-		}
-
-		[HideReferenceObjectPicker]
-		private struct SerializedSaveData {
-			public string SceneName;
-
-			[HideReferenceObjectPicker]
-			public readonly Dictionary<string, Dictionary<string, ValueWrapper>> Data;
-
-			public SerializedSaveData(SaveData original) {
-				SceneName = original.SceneName;
-				Data = new Dictionary<string, Dictionary<string, ValueWrapper>>();
-
-				foreach (var (identifier, valueMap) in original.Data) {
-					Data[identifier] = valueMap.ToDictionary(pair => pair.Key,
-						pair => new ValueWrapper {
-							value = pair.Value
-						});
-				}
-			}
-
-			[InlineProperty]
-			public struct ValueWrapper {
-				[HideReferenceObjectPicker, HideLabel]
-				public object value;
-			}
 		}
 
 #region Boilerplate

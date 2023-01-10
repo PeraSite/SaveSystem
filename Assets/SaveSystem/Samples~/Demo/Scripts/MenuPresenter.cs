@@ -10,22 +10,25 @@ namespace SaveSystem.Samples {
 		[SerializeField] private TextMeshProUGUI[] _slotSceneNames;
 		[SerializeField] private string _startingScene;
 
+		private SlotScope _slotScope;
 		private SaveManager _saveManager;
 
 		private void Start() {
-			var save = _saveManager.CurrentSnapshot;
+			_slotScope.CurrentSlot = SlotScope.NOT_SELECTED_SLOT;
 
 			for (var i = 0; i < _slotButtons.Length; i++) {
 				var slot = i;
-				var key = GetKey(slot);
 
-				_slotSceneNames[slot].text = save.Data.ContainsKey(key) ? save.SceneName : "Empty";
+				var hasData = _slotScope.Snapshot.ContainsKey(slot);
+
+				_slotSceneNames[slot].text =
+					hasData ? _slotScope.GetMetadata(slot).SceneName : "Empty";
 
 				_slotButtons[i].onClick.AddListener(() => {
-					_saveManager.SlotName = key;
+					_slotScope.CurrentSlot = slot;
 
-					if (save.Data.ContainsKey(key)) {
-						_saveManager.StartGame(save.SceneName);
+					if (hasData) {
+						_saveManager.StartGame(_slotScope.GetMetadata(slot).SceneName);
 					} else {
 						_saveManager.NewGame(_startingScene);
 					}
@@ -33,13 +36,10 @@ namespace SaveSystem.Samples {
 			}
 		}
 
-		private static string GetKey(int slot) {
-			return $"Slot {slot}";
-		}
-
 		[Inject]
-		private void Construct(SaveManager saveManager) {
+		private void Construct(SaveManager saveManager, SlotScope slotScope) {
 			_saveManager = saveManager;
+			_slotScope = slotScope;
 		}
 	}
 }

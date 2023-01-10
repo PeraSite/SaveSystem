@@ -3013,6 +3013,7 @@ GameObject:
   - component: {fileID: 2092260779}
   - component: {fileID: 2092260781}
   - component: {fileID: 2092260780}
+  - component: {fileID: 2092260782}
   m_Layer: 5
   m_Name: Settings
   m_TagString: Untagged
@@ -3083,3 +3084,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092260778}
   m_CullTransparentMesh: 1
+--- !u!114 &2092260782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092260778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 144b365f1b5948ab80206f03ccbe63f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _keyType: 0
+  _key: SettingSaver_Settings
+  _musicSlider: {fileID: 1107896139}
+  _soundSlider: {fileID: 552930922}

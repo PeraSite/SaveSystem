@@ -1,123 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace SaveSystem.Runtime {
 	public class SaveManager : IInitializable, IDisposable {
-		public const string SAVE_FILE_KEY = "save";
+		// Constants
+		private const string SAVE_KEY = "DummySave";
 
 		// Dependencies
-		[Inject] private readonly IDataStorage _dataStorage;
-		[Inject] private readonly IDataSerializer _dataSerializer;
-		[Inject] private readonly SceneTransitionManager _sceneTransitionManager;
-		[InjectOptional] private readonly List<ISaver> _savers = new();
+		private IDataStorage _dataStorage;
+		private IDataSerializer _dataSerializer;
+		private IScope<Dictionary<string, object>> _rootScope;
+		private SceneTransitionManager _transitionManager;
 
-		// State
-		public SaveData CurrentSnapshot { get; private set; }
-		[InjectOptional] public string SlotName = "Default Slot";
-
-		public void MakeSnapshot() {
-			// 씬 이름 저장
-			CurrentSnapshot.SceneName = SceneManager.GetActiveScene().name;
-
-			// 슬롯에 데이터 없으면 새로 생성
-			if (!CurrentSnapshot.Data.ContainsKey(SlotName)) {
-				CurrentSnapshot.Data.Add(SlotName, new Dictionary<string, object>());
-			}
-
-			// 데이터 저장
-			foreach (var saver in _savers) {
-				CurrentSnapshot.Data[SlotName][saver.Key] = saver.SaveDataWeak();
-			}
-
-			Debug.Log("[SaveManager] Snapshot created");
-		}
+		// States
+		// BUG: SaveManager#Snapshot이 _rootScope#Snapshot과 동기화되지 않음
+		public Dictionary<string, object> Snapshot = new();
 
 		public void ApplySnapshot() {
-			if (!CurrentSnapshot.Data.TryGetValue(SlotName, out var dataMap)) {
-				ResetSavers();
-				return;
-			}
-
-			// 데이터 로드
-			foreach (var saver in _savers) {
-				if (dataMap.TryGetValue(saver.Key, out var value)) {
-					saver.ApplyDataWeak(value);
-				}
-			}
-			Debug.Log("[SaveManager] Snapshot applied");
+			_rootScope.ApplyData(Snapshot);
+			Debug.Log("[SaveManager] ApplySnapshot");
 		}
 
-		public void ResetSavers() {
-			// 모든 Saver의 ResetData 호출
-			foreach (var saver in _savers) {
-				saver.ResetData();
-			}
-			Debug.Log("[SaveManager] All savers reset");
-		}
-
-		public void Save() {
-			var serializedSaveData = _dataSerializer.Serialize(CurrentSnapshot);
-			_dataStorage.Save(SAVE_FILE_KEY, serializedSaveData);
-			Debug.Log($"[SaveSystem] Data Saved : {serializedSaveData}");
+		public void CaptureSnapshot() {
+			Snapshot = _rootScope.SaveData();
+			Debug.Log($"[SaveManager] CaptureSnapshot: {_dataSerializer.Serialize(Snapshot)}");
 		}
 
 		public void Load() {
-			var saveDataString = _dataStorage.Load(SAVE_FILE_KEY);
-			CurrentSnapshot = _dataSerializer.Deserialize<SaveData>(saveDataString);
-			Debug.Log($"[SaveSystem] Data Loaded : {saveDataString}");
+			// Storage에서 불러와 캐시에 저장
+			var loaded = _dataStorage.Load(SAVE_KEY);
+			var serialized = _dataSerializer.Deserialize<Dictionary<string, object>>(loaded);
+			Snapshot = serialized ?? throw new Exception($"Can't serialized: {loaded}");
+			Debug.Log($"[SaveManager] Load: {loaded}");
+
+			// 저장된 캐시 적용
+			ApplySnapshot();
 		}
 
-		public void Delete() {
-			_dataStorage.Delete(SAVE_FILE_KEY);
-			Debug.Log($"[SaveSystem] Data Deleted");
+		public void Save() {
+			// 캐시 업데이트
+			CaptureSnapshot();
+
+			// 캐시를 Storage에 저장
+			var saved = _dataSerializer.Serialize(Snapshot);
+			_dataStorage.Save(SAVE_KEY, saved);
+			Debug.Log($"[SaveManager] Save: {saved}");
 		}
 
-		public void ResetData() {
-			// CurrentSnapshot 초기화
-			CurrentSnapshot = new SaveData();
-			Debug.Log($"[SaveSystem] Data reset");
-		}
-
-		public void RegisterSaver(ISaver saver) {
-			Debug.Log($"[SaveSystem] Register: {saver.GetType().Name}");
-			_savers.Add(saver);
-		}
-
-		public void UnregisterSaver(ISaver saver) {
-			Debug.Log($"[SaveSystem] Unregister: {saver.GetType().Name}");
-			_savers.Remove(saver);
+		public void Reset() {
+			_rootScope.ResetData();
+			Debug.Log("[SaveManager] Reset");
 		}
 
 		public void Initialize() {
-			// 저장된 데이터가 없으면 데이터 초기화
-			if (_dataStorage.Has(SAVE_FILE_KEY)) {
+			if (_dataStorage.Has(SAVE_KEY)) {
 				Load();
-				ApplySnapshot();
 			} else {
-				ResetData();
-				ResetSavers();
+				Reset();
 			}
 		}
 
 		public void Dispose() {
-			MakeSnapshot();
 			Save();
+		}
+
+		[Inject]
+		public void Construct(IDataStorage dataStorage,
+			IDataSerializer dataSerializer,
+			SceneTransitionManager transitionManager,
+			IScope<Dictionary<string, object>> rootScope) {
+			_dataStorage = dataStorage;
+			_dataSerializer = dataSerializer;
+			_rootScope = rootScope;
+			_transitionManager = transitionManager;
 		}
 
 #region Scene Management
 		public void StartGame(string startSceneName) {
-			_sceneTransitionManager.ChangeScene(startSceneName, afterSceneChange: ApplySnapshot);
+			_transitionManager.ChangeScene(startSceneName, CaptureSnapshot, afterSceneChange: ApplySnapshot);
 		}
 
 		public void NewGame(string startSceneName) {
-			_sceneTransitionManager.ChangeScene(startSceneName, afterSceneChange: ResetSavers);
+			_transitionManager.ChangeScene(startSceneName, CaptureSnapshot, afterSceneChange: Reset);
 		}
 
 		public void ChangeScene(string sceneName) {
-			_sceneTransitionManager.ChangeScene(sceneName, MakeSnapshot, ApplySnapshot);
+			_transitionManager.ChangeScene(sceneName, CaptureSnapshot, ApplySnapshot);
 		}
 #endregion
 	}

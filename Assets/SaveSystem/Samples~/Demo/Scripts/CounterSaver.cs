@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 namespace SaveSystem.Samples {
-	public class CounterSaver : Saver<int> {
+	public class CounterSaver : Saver<int, SlotScope> {
 		[SerializeField] private TextMeshProUGUI _text;
 		[SerializeField] private int _value;
 

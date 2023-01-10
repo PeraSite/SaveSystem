@@ -1,14 +1,15 @@
 ﻿using System;
 using UnityEngine;
 using Zenject;
+
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
 #endif
 
 namespace SaveSystem.Runtime {
-	public abstract class Saver<T> : MonoBehaviour, ISaver<T> {
+	public abstract class Saver<TValue, TScope> : MonoBehaviour, ISaver<TValue> where TScope : IScope {
 #if ODIN_INSPECTOR
-		[FoldoutGroup("Saver"), SerializeField, OnValueChanged("GenerateKey")]
+		[FoldoutGroup("Saver"), SerializeField]
 		private KeyType _keyType;
 
 		[FoldoutGroup("Saver"), SerializeField]
@@ -24,8 +25,6 @@ namespace SaveSystem.Runtime {
 		public string Key => _key;
 #endif
 
-		private SaveManager _saveManager;
-
 #if UNITY_EDITOR
 		private void OnValidate() {
 			// Key가 할당되지 않았으면 새로 할당
@@ -37,21 +36,21 @@ namespace SaveSystem.Runtime {
 			};
 		}
 #endif
+		private TScope _scope;
 
 		[Inject]
-		public void Construct(SaveManager manager) {
-			_saveManager = manager;
-
-			_saveManager.RegisterSaver(this);
+		public void Construct(TScope scope) {
+			_scope = scope;
+			_scope.RegisterSaver(this);
 		}
 
 		private void OnDestroy() {
-			_saveManager.UnregisterSaver(this);
+			_scope.UnregisterSaver(this);
 		}
 
-		public abstract void ApplyData(T data);
+		public abstract void ApplyData(TValue data);
 
-		public abstract T SaveData();
+		public abstract TValue SaveData();
 
 		public virtual void ResetData() { }
 	}

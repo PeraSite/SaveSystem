@@ -5,8 +5,9 @@ using UnityEngine;
 using Zenject;
 
 namespace SaveSystem.Runtime {
-	public abstract class SerializedSaver<T> : SerializedMonoBehaviour, ISaver<T> {
-		[FoldoutGroup("Saver"), SerializeField, OnValueChanged("GenerateKey")]
+	public abstract class SerializedSaver<TValue, TScope> : SerializedMonoBehaviour, ISaver<TValue>
+		where TScope : IScope {
+		[FoldoutGroup("Saver"), SerializeField]
 		private KeyType _keyType;
 
 		[FoldoutGroup("Saver"), SerializeField]
@@ -26,21 +27,21 @@ namespace SaveSystem.Runtime {
 			};
 		}
 #endif
+		private TScope _scope;
 
 		[Inject]
-		public void Construct(SaveManager manager) {
-			_saveManager = manager;
-
-			_saveManager.RegisterSaver(this);
+		public void Construct(TScope scope) {
+			_scope = scope;
+			_scope.RegisterSaver(this);
 		}
 
 		private void OnDestroy() {
-			_saveManager.UnregisterSaver(this);
+			_scope.UnregisterSaver(this);
 		}
 
-		public abstract void ApplyData(T data);
+		public abstract void ApplyData(TValue data);
 
-		public abstract T SaveData();
+		public abstract TValue SaveData();
 
 		public virtual void ResetData() { }
 	}

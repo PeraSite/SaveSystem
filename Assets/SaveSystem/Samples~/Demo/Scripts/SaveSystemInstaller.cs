@@ -8,13 +8,29 @@ namespace SaveSystem.Samples {
 		[SerializeField] private float _animationTime;
 
 		public override void InstallBindings() {
-			// 구현체는 Self Bind 하지 않고 인터페이스만 등록
+			// Base
 			Container.BindInterfacesTo<OdinDataSerializer>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<PlayerPrefDataStorage>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<FadeSceneTransition>().AsSingle().WithArguments(_fade, _animationTime).NonLazy();
+			Container.Bind<SceneTransitionManager>().AsSingle().NonLazy();
 
-			// SaveManager를 Self Bind
+			// Scope
+			BindScope<GlobalScope>();
+			BindScope<SlotScope>();
+			BindScope<RootScope>(true);
+
+			// Core Manager
 			Container.BindInterfacesAndSelfTo<SaveManager>().AsSingle().NonLazy();
+		}
+
+		private void BindScope<T>(bool isRoot = false) where T : IScope {
+			var binder = Container.BindInterfacesAndSelfTo<T>().AsSingle();
+			if (isRoot) {
+				binder.NonLazy();
+			} else {
+				// root이 아니라면 SaveManager에 Inject하지 않음
+				binder.WhenNotInjectedInto<SaveManager>().NonLazy();
+			}
 		}
 	}
 }
