@@ -44,8 +44,10 @@ namespace SaveSystem.Samples {
 		// States
 		public int CurrentSlot = EDITOR_SLOT; // 빌드 시 메인화면에서 -1로 설정함
 
+		[Inject] private IDataSerializer _serializer;
+
 		public override void ApplyData(Dictionary<int, Dictionary<string, object>> data) {
-			Debug.Log($"[{Key} Scope] ApplyData {new OdinDataSerializer().Serialize(data)}");
+			Debug.Log($"[{Key} Scope] ApplyData {_serializer.Serialize(data)}");
 
 			Snapshot = data;
 
@@ -74,7 +76,7 @@ namespace SaveSystem.Samples {
 				var capturedState = CaptureSaver();
 				foreach (var (key, value) in capturedState) {
 					result[CurrentSlot][key] = value;
-					Debug.Log($"[{Key} Scope] Slot {CurrentSlot} / {key} -> {new OdinDataSerializer().Serialize(value)}");
+					Debug.Log($"[{Key} Scope] Slot {CurrentSlot} / {key} -> {_serializer.Serialize(value)}");
 				}
 			}
 

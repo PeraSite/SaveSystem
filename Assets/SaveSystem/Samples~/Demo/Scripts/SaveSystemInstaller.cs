@@ -9,7 +9,7 @@ namespace SaveSystem.Samples {
 
 		public override void InstallBindings() {
 			// Base
-			Container.BindInterfacesTo<OdinDataSerializer>().AsSingle().NonLazy();
+			Container.BindInterfacesTo<NewtonJsonDataSerializer>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<PlayerPrefDataStorage>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<FadeSceneTransition>().AsSingle().WithArguments(_fade, _animationTime).NonLazy();
 			Container.Bind<SceneTransitionManager>().AsSingle().NonLazy();

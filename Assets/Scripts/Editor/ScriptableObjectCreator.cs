@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if ODIN_INSPECTOR
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace PeraCore.Editor {
 			window.targetFolder = path.Trim('/');
 		}
 
-		private UnityEngine.ScriptableObject previewObject;
+		private ScriptableObject previewObject;
 		private string targetFolder;
 		private Vector2 scroll;
 
@@ -117,3 +118,5 @@ namespace PeraCore.Editor {
 		}
 	}
 }
+
+  #endif

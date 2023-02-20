@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Zenject;
 
 namespace SaveSystem.Runtime {
 	public abstract class BaseScope : IScope<Dictionary<string, object>> {
 		public abstract string Key { get; }
-
 		public Dictionary<string, ISaver> Savers { get; } = new();
 		public Dictionary<string, object> Snapshot { get; set; } = new();
 
+		[Inject] private IDataSerializer _serializer;
+
 		public virtual void ApplyData(Dictionary<string, object> data) {
-			Debug.Log($"[{Key} Scope] ApplyData {new OdinDataSerializer().Serialize(data)}");
+			Debug.Log($"[{Key} Scope] ApplyData {_serializer.Serialize(data)}");
 
 			foreach (var (key, value) in data) {
 				if (!Savers.TryGetValue(key, out var saver)) {
@@ -28,7 +30,7 @@ namespace SaveSystem.Runtime {
 			var capturedState = Savers.ToDictionary(pair => pair.Key, pair => pair.Value.SaveDataWeak());
 
 			foreach (var (key, value) in capturedState) {
-				Debug.Log($"[{Key} Scope] {key} -> {new OdinDataSerializer().Serialize(value)}");
+				Debug.Log($"[{Key} Scope] {key} -> {_serializer.Serialize(value)}");
 				result[key] = value;
 			}
 
@@ -76,7 +78,6 @@ namespace SaveSystem.Runtime {
 	public abstract class BaseScope<TValue> : IScope<TValue> {
 		public abstract string Key { get; }
 		public abstract TValue Snapshot { get; set; }
-
 		public Dictionary<string, ISaver> Savers { get; } = new();
 
 		public virtual void ResetData() {
