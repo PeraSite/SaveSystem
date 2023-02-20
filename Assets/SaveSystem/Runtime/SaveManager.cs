@@ -27,16 +27,20 @@ namespace SaveSystem.Runtime {
 
 		public void Load() {
 			// Storage에서 불러와 캐시에 저장
+			var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 			var loaded = _dataStorage.Load(SAVE_KEY);
 			var serialized = _dataSerializer.Deserialize<Dictionary<string, object>>(loaded);
 			var snapshot = serialized ?? throw new Exception($"Can't serialized: {loaded}");
 			Debug.Log($"[SaveManager] Load: {loaded}");
 
+
 			// 로드된 Snapshot 적용
 			RootScope.ApplyData(snapshot);
+			Debug.Log($"[SaveManager] Load takes {stopwatch.ElapsedMilliseconds}ms");
 		}
 
 		public void Save() {
+			var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 			// 캐시 업데이트
 			CaptureSnapshot();
 
@@ -44,6 +48,7 @@ namespace SaveSystem.Runtime {
 			var saved = _dataSerializer.Serialize(RootScope.Snapshot);
 			_dataStorage.Save(SAVE_KEY, saved);
 			Debug.Log($"[SaveManager] Save: {saved}");
+			Debug.Log($"[SaveManager] Save takes {stopwatch.ElapsedMilliseconds}ms");
 		}
 
 		public void Reset() {
