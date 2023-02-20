@@ -3,5 +3,6 @@
 		Type_Name,
 		Name,
 		Guid,
+		Custom,
 	}
 }

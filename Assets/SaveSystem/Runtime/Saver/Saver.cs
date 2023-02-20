@@ -9,10 +9,10 @@ using Sirenix.OdinInspector;
 namespace SaveSystem.Runtime {
 	public abstract class Saver<TValue, TScope> : MonoBehaviour, ISaver<TValue> where TScope : IScope {
 #if ODIN_INSPECTOR
-		[FoldoutGroup("Saver"), SerializeField]
+		[FoldoutGroup("Saver"), OnValueChanged("OnValueChanged"), SerializeField]
 		private KeyType _keyType;
 
-		[FoldoutGroup("Saver"), SerializeField]
+		[FoldoutGroup("Saver"), EnableIf("IsKeyEditable"), SerializeField]
 		private string _key;
 		public string Key => _key;
 #else
@@ -31,7 +31,7 @@ namespace SaveSystem.Runtime {
 			_key ??= _keyType switch {
 				KeyType.Guid => Guid.NewGuid().ToString(),
 				KeyType.Type_Name => $"{GetType().Name}_{name}",
-				KeyType.Name => name,
+				KeyType.Name or KeyType.Custom => name,
 				_ => throw new ArgumentOutOfRangeException()
 			};
 		}
@@ -53,5 +53,18 @@ namespace SaveSystem.Runtime {
 		public abstract TValue SaveData();
 
 		public virtual void ResetData() { }
+
+#if ODIN_INSPECTOR
+		private void OnValueChanged() {
+			_key = _keyType switch {
+				KeyType.Guid => Guid.NewGuid().ToString(),
+				KeyType.Type_Name => $"{GetType().Name}_{name}",
+				KeyType.Name => name,
+				_ => ""
+			};
+		}
+
+		private bool IsKeyEditable() => _keyType == KeyType.Custom;
+#endif
 	}
 }
