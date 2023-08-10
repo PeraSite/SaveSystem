@@ -35,8 +35,15 @@ namespace SaveSystem.Runtime {
 			_scope.RegisterSaver(this);
 		}
 
-		private void OnDestroy() {
-			_scope.UnregisterSaver(this);
+		protected virtual void Awake() {
+			if (_scope == null) {
+				Debug.LogError($"Saver object {name} is not injected {typeof(TScope).Name} scope!");
+				gameObject.SetActive(false);
+			}
+		}
+
+		protected virtual void OnDestroy() {
+			_scope?.UnregisterSaver(this);
 		}
 
 		public abstract void ApplyData(TValue data);
