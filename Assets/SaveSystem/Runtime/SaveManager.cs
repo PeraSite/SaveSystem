@@ -13,7 +13,7 @@ namespace SaveSystem.Runtime {
 		private IDataStorage _dataStorage;
 		private IDataSerializer _dataSerializer;
 		private SceneTransitionManager _transitionManager;
-		public IScope<Dictionary<string, object>> RootScope;
+		public BaseScope RootScope;
 
 		public void ApplySnapshot() {
 			RootScope.ApplyData(RootScope.Snapshot);
@@ -67,11 +67,11 @@ namespace SaveSystem.Runtime {
 		private void Construct(IDataStorage dataStorage,
 			IDataSerializer dataSerializer,
 			SceneTransitionManager transitionManager,
-			IScope<Dictionary<string, object>> rootScope) {
+			[Inject(Id = "RootScope")] BaseScope rootScope) {
 			_dataStorage = dataStorage;
 			_dataSerializer = dataSerializer;
-			RootScope = rootScope;
 			_transitionManager = transitionManager;
+			RootScope = rootScope;
 		}
 
 #region Scene Management

@@ -1,4 +1,5 @@
-﻿using SaveSystem.Runtime;
+﻿using System.Collections.Generic;
+using SaveSystem.Runtime;
 using SaveSystem.Samples.Serialization;
 using Sirenix.Serialization;
 using UnityEngine;
@@ -19,22 +20,14 @@ namespace SaveSystem.Samples {
 			Container.BindInterfacesTo<AddressableReferenceResolver>().AsSingle().NonLazy();
 
 			// Scope
-			BindScope<GlobalScope>();
-			BindScope<SlotScope>();
-			BindScope<RootScope>(true);
+			Container.BindInterfacesAndSelfTo<GlobalScope>().AsSingle().NonLazy();
+			Container.BindInterfacesAndSelfTo<SlotScope>().AsSingle().NonLazy();
+			Container.Bind<BaseScope>()
+				.WithId("RootScope")
+				.To<RootScope>().AsSingle().NonLazy();
 
 			// Core Manager
 			Container.BindInterfacesAndSelfTo<SaveManager>().AsSingle().NonLazy();
-		}
-
-		private void BindScope<T>(bool isRoot = false) where T : IScope {
-			var binder = Container.BindInterfacesAndSelfTo<T>().AsSingle();
-			if (isRoot) {
-				binder.NonLazy();
-			} else {
-				// root이 아니라면 SaveManager에 Inject하지 않음
-				binder.WhenNotInjectedInto<SaveManager>().NonLazy();
-			}
 		}
 	}
 }
