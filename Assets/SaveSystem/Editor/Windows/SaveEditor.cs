@@ -9,8 +9,14 @@ using Zenject;
 
 namespace SaveSystem.Editor {
 	public class SaveEditor : OdinEditorWindow {
-		[ShowInInspector, ReadOnly]
-		private Dictionary<string, object> SaveData => SaveManager?.RootScope.Snapshot;
+		[ShowInInspector, EnableIf("@SaveManager != null"), OnValueChanged("OnSaveDataChanged", true)]
+		private Dictionary<string, object> SaveData {
+			get => SaveManager?.RootScope.Snapshot;
+			set {
+				if (SaveManager != null)
+					SaveManager.RootScope.Snapshot = value;
+			}
+		}
 
 		[ButtonGroup("Storage", VisibleIf = "@SaveManager != null")]
 		private void Save() {
@@ -30,6 +36,10 @@ namespace SaveSystem.Editor {
 		[ButtonGroup("Snapshot")]
 		private void ApplySnapshot() {
 			SaveManager?.ApplySnapshot();
+		}
+
+		private void OnSaveDataChanged() {
+			ApplySnapshot();
 		}
 
 #region Boilerplate
