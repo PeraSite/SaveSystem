@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using SaveSystem.Runtime;
+﻿using SaveSystem.Runtime;
+using Sirenix.Serialization;
 
 namespace SaveSystem.Samples {
-	[Serializable]
-	public struct Inventory {
-		public List<Item> Items;
-	}
-
-	public class InventorySaver : Saver<Inventory, SlotScope> {
+	public class InventorySaver : SerializedSaver<Inventory, SlotScope> {
+		[OdinSerialize]
 		public Inventory Inventory;
 
 		public override void ApplyData(Inventory data) {
