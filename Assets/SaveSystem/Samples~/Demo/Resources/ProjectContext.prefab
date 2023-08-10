@@ -267,5 +267,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94c2968c784342d09296538d2273ca36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _dataFormat: 1
   _fade: {fileID: 82690340695130452}
   _animationTime: 0.5
