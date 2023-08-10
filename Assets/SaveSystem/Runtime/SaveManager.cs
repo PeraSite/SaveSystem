@@ -69,7 +69,7 @@ namespace SaveSystem.Runtime {
 		}
 
 		[Inject]
-		public void Construct(IDataStorage dataStorage,
+		private void Construct(IDataStorage dataStorage,
 			IDataSerializer dataSerializer,
 			SceneTransitionManager transitionManager,
 			IScope<Dictionary<string, object>> rootScope) {

@@ -39,7 +39,7 @@ namespace SaveSystem.Runtime {
 		private TScope _scope;
 
 		[Inject]
-		public void Construct(TScope scope) {
+		private void Construct(TScope scope) {
 			_scope = scope;
 			_scope.RegisterSaver(this);
 		}

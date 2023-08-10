@@ -22,7 +22,7 @@ namespace SaveSystem.Samples {
 		}
 
 		[Inject]
-		public void Construct(GlobalScope globalScope, SlotScope slotScope) {
+		private void Construct(GlobalScope globalScope, SlotScope slotScope) {
 			_globalScope = globalScope;
 			_slotScope = slotScope;
 		}

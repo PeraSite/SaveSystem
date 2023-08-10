@@ -7,7 +7,7 @@ namespace SaveSystem.Samples {
 		private SaveManager _saveManager;
 
 		[Inject]
-		public void Construct(ZenjectSceneLoader sceneLoader, SaveManager saveManager) {
+		private void Construct(ZenjectSceneLoader sceneLoader, SaveManager saveManager) {
 			_saveManager = saveManager;
 		}
 
