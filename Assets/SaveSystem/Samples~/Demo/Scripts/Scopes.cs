@@ -52,15 +52,26 @@ namespace SaveSystem.Samples {
 			Snapshot = data;
 
 			// 현재 슬롯이 지정되지 않으면 리턴
-			if (CurrentSlot == NOT_SELECTED_SLOT) return;
+			if (CurrentSlot == NOT_SELECTED_SLOT) {
+				Debug.LogWarning($"[{Key} Scope] No slot selected");
+				return;
+			}
 
-			// 지정된 현재 슬롯이 세이브에 없으면 리턴
-			if (!data.TryGetValue(CurrentSlot, out var saverDataMap)) return;
+			// 지정된 현재 슬롯이 세이브에 없으면 리셋
+			if (!data.TryGetValue(CurrentSlot, out Dictionary<string, object> currentSlotData)) {
+				foreach ((_, ISaver saver) in this.Savers) {
+					saver.ResetData();
+				}
+				return;
+			}
 
 			// 데이터 적용
-			foreach (var (key, value) in saverDataMap) {
-				if (!Savers.TryGetValue(key, out var saver)) continue;
-				saver.ApplyDataWeak(value);
+			foreach ((var key, ISaver saver) in Savers) {
+				if (currentSlotData.TryGetValue(key, out var value)) {
+					saver.ApplyDataWeak(value);
+				} else {
+					saver.ResetData();
+				}
 			}
 
 		}

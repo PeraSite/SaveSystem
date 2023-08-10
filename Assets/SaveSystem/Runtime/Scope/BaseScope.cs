@@ -15,12 +15,12 @@ namespace SaveSystem.Runtime {
 		public virtual void ApplyData(Dictionary<string, object> data) {
 			Debug.Log($"[{Key} Scope] ApplyData {_serializer.Serialize(data)}");
 
-			foreach (var (key, value) in data) {
-				if (!Savers.TryGetValue(key, out var saver)) {
-					Debug.Log($"[{Key} Scope] No saver found for key {key}");
-					continue;
+			foreach ((var key, ISaver saver) in Savers) {
+				if (data.TryGetValue(key, out var value)) {
+					saver.ApplyDataWeak(value);
+				} else {
+					saver.ResetData();
 				}
-				saver.ApplyDataWeak(value);
 			}
 			Snapshot = data;
 		}
